@@ -103,6 +103,7 @@ const PostList = () => {
             filters={postFilter}
             sort={{ field: 'published_at', order: 'DESC' }}
             exporter={exporter}
+            perPage={25}
         >
             {isSmall ? (
                 <SimpleList

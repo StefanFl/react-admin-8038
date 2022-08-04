@@ -32,6 +32,13 @@ import {
     useCreateSuggestionContext,
     EditActionsProps,
     usePermissions,
+    List,
+    SearchInput,
+    BooleanField,
+    NumberField,
+    ReferenceArrayField,
+    SingleFieldList,
+    ChipField,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import {
     Box,
@@ -44,6 +51,7 @@ import {
 } from '@mui/material';
 import PostTitle from './PostTitle';
 import TagReferenceInput from './TagReferenceInput';
+import { styled } from '@mui/material/styles';
 
 const CreateCategory = ({
     onAddChoice,
@@ -99,6 +107,31 @@ const categories = [
     { name: 'Lifestyle', id: 'lifestyle' },
 ];
 
+const postFilter = [
+    <SearchInput source="q" alwaysOn />,
+    <DateInput source="publishedAt" alwaysOn />,
+];
+
+const StyledDatagrid = styled(Datagrid)(({ theme }) => ({
+    '& .title': {
+        maxWidth: '20em',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+    },
+    '& .hiddenOnSmallScreens': {
+        [theme.breakpoints.down('lg')]: {
+            display: 'none',
+        },
+    },
+    '& .column-tags': {
+        minWidth: '9em',
+    },
+    '& .publishedAt': { fontStyle: 'italic' },
+}));
+
+const ListActions = () => <TopToolbar />;
+
 const PostEdit = () => {
     const { permissions } = usePermissions();
     return (
@@ -107,6 +140,43 @@ const PostEdit = () => {
                 defaultValues={{ average_note: 0 }}
                 warnWhenUnsavedChanges
             >
+                <FormTab label="post.form.list">
+                    <List
+                        filters={postFilter}
+                        sort={{ field: 'published_at', order: 'DESC' }}
+                        perPage={10}
+                        actions={<ListActions />}
+                    >
+                        <StyledDatagrid optimized>
+                            <TextField source="id" />
+                            <TextField source="title" cellClassName="title" />
+                            <DateField
+                                source="published_at"
+                                sortByOrder="DESC"
+                                cellClassName="publishedAt"
+                            />
+
+                            <BooleanField
+                                source="commentable"
+                                label="resources.posts.fields.commentable_short"
+                                sortable={false}
+                            />
+                            <NumberField source="views" sortByOrder="DESC" />
+                            <ReferenceArrayField
+                                label="Tags"
+                                reference="tags"
+                                source="tags"
+                                sortBy="tags.name"
+                                cellClassName="hiddenOnSmallScreens"
+                                headerClassName="hiddenOnSmallScreens"
+                            >
+                                <SingleFieldList>
+                                    <ChipField source="name.en" size="small" />
+                                </SingleFieldList>
+                            </ReferenceArrayField>
+                        </StyledDatagrid>
+                    </List>
+                </FormTab>
                 <FormTab label="post.form.summary">
                     <SanitizedBox
                         display="flex"
